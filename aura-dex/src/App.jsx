@@ -1,13 +1,16 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import './App.css'
 
 function App() {
+  const [allpoki, setallpoki] = useState([])
   const [pokemon, setPokemon] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedPokemon, setSelectedPokemon] = useState(null);
   const [pokemonDetails, setPokemonDetails] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [loadingMore, setLoadingMore] = useState(false);
+  const [showSearchResults, setShowSearchResults] = useState(false);
+  const searchRef = useRef(null);
   const offset = 20;
 
   useEffect(() => {
@@ -20,12 +23,33 @@ function App() {
     }
   }, [selectedPokemon]);
 
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
+        setShowSearchResults(false);
+      }
+    }
+    
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [searchRef]);
+
   const fetchPokemon = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:3000/');
-      const data = await response.json();
+      let response = await fetch('http://localhost:3000/');
+      let data = await response.json();
       setPokemon(data);
+      try {
+        const allPokiResponse = await fetch('http://localhost:3000/allpoki');
+        const allPokiData = await allPokiResponse.json();
+        setallpoki(allPokiData);
+        console.log(allPokiData);
+      } catch (err) {
+        console.error('Error fetching all pokemon:', err);
+      }
     } catch (error) {
       console.error('Error fetching Pokemon:', error);
     } finally {
@@ -49,36 +73,90 @@ function App() {
   const loadMorePokemon = async () => {
     try {
       setLoadingMore(true);
-      // The backend already keeps track of offset
       const response = await fetch('http://localhost:3000/');
       const newPokemon = await response.json();
-      
-      // Since the backend returns the complete list each time,
-      // we should replace our current list with the new one
+  
       setPokemon(newPokemon);
-    } catch (error) {
-      console.error('Error loading more Pokemon:', error);
-    } finally {
-      setLoadingMore(false);
-    }
+        } catch (error) {
+          console.error('Error loading more Pokemon:', error);
+        } finally {
+          setLoadingMore(false);
+        }
+      };
+
+  const searchSuggestions = allpoki
+    .filter(p => p.toLowerCase().includes(searchTerm.toLowerCase()))
+    .slice(0, 8);
+  
+  const getPokemonUrl = (name) => {
+    const pokemonObj = pokemon.find(p => p.name === name);
+    return pokemonObj ? pokemonObj.url : null;
   };
 
-  const filteredPokemon = pokemon.filter((p) =>
-    p.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const handleSelectFromSearch = (name) => {
+    setSelectedPokemon(name);
+    setSearchTerm('');
+    setShowSearchResults(false);
+  };
 
   return (
     <div className="pokedex-container">
       <header className="header">
         <h1>AuraDex</h1>
-        <div className="search-container">
-          <input
-            type="text"
-            placeholder="Search Pokémon..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="search-input"
-          />
+        <div className="search-wrapper" ref={searchRef}>
+          <div className="search-container">
+            <input
+              type="text"
+              placeholder="Search Pokémon..."
+              value={searchTerm}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setShowSearchResults(e.target.value !== '');
+              }}
+              onFocus={() => searchTerm && setShowSearchResults(true)}
+              className="search-input"
+            />
+            {searchTerm && (
+              <button 
+                className="clear-search" 
+                onClick={() => {
+                  setSearchTerm('');
+                  setShowSearchResults(false);
+                }}
+              >
+                ×
+              </button>
+            )}
+          </div>
+          {showSearchResults && searchTerm && (
+            <div className='search-results'>
+              {searchSuggestions.length > 0 ? (
+                searchSuggestions.map((pokemonName) => {
+                  const url = getPokemonUrl(pokemonName);
+                  return (
+                    <div 
+                      key={pokemonName} 
+                      className="search-result-item"
+                      onClick={() => handleSelectFromSearch(pokemonName)}
+                    >
+                      {url ? (
+                        <img 
+                          src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${url.split('/')[6]}.png`} 
+                          alt={pokemonName} 
+                          className="search-result-sprite"
+                        />
+                      ) : (
+                        <div className="search-result-sprite placeholder"></div>
+                      )}
+                      <span style={{ color: "black" }}>{pokemonName}</span>
+                    </div>
+                  );
+                })
+              ) : (
+                <div className="no-results">No Pokémon found</div>
+              )}
+            </div>
+          )}
         </div>
       </header>
 

@@ -42,6 +42,13 @@ app.get('/info/:name',async(req,res)=>{
     res.send(JSON.stringify(dox));
 })
 
+app.get('/allpoki', async(req, res) => {
+    const response = await fetch('https://pokeapi.co/api/v2/pokemon?limit=100000&offset=0').then(body => body.json());
+    var result = response.results.map(e => e.name);
+    result = JSON.stringify(result);
+    console.log(result)
+    res.status(200).send(result)
+})
 // Start the server
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
