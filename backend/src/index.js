@@ -49,6 +49,7 @@ app.get('/allpoki', async(req, res) => {
     console.log(result)
     res.status(200).send(result)
 })
+
 // Start the server
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
