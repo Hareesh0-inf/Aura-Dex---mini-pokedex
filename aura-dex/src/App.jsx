@@ -39,11 +39,11 @@ function App() {
   const fetchPokemon = async () => {
     try {
       setLoading(true);
-      let response = await fetch('http://localhost:3000/');
+      let response = await fetch('http://localhost:3000/mons');
       let data = await response.json();
       setPokemon(data);
       try {
-        const allPokiResponse = await fetch('http://localhost:3000/allpoki');
+        const allPokiResponse = await fetch('http://localhost:3000/mons/allpoki');
         const allPokiData = await allPokiResponse.json();
         setallpoki(allPokiData);
         console.log(allPokiData);
@@ -60,7 +60,7 @@ function App() {
   const fetchPokemonDetails = async (name) => {
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:3000/info/${name}`);
+      const response = await fetch(`http://localhost:3000/mons/info/${name}`);
       const data = await response.json();
       setPokemonDetails(data);
     } catch (error) {
@@ -73,16 +73,16 @@ function App() {
   const loadMorePokemon = async () => {
     try {
       setLoadingMore(true);
-      const response = await fetch('http://localhost:3000/');
+      const response = await fetch('http://localhost:3000/mons');
       const newPokemon = await response.json();
   
       setPokemon(newPokemon);
-        } catch (error) {
-          console.error('Error loading more Pokemon:', error);
-        } finally {
-          setLoadingMore(false);
-        }
-      };
+    } catch (error) {
+      console.error('Error loading more Pokemon:', error);
+    } finally {
+      setLoadingMore(false);
+    }
+  };
 
   const searchSuggestions = allpoki
     .filter(p => p.toLowerCase().includes(searchTerm.toLowerCase()))

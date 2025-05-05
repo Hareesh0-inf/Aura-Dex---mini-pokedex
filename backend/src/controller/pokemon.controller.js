@@ -1,4 +1,8 @@
-async function getAllmon(req, res) {
+var pokelist = [];
+var offset = 0;
+var limit = 20;
+
+async function getAllmon(req,res) {
     const response = await fetch('https://pokeapi.co/api/v2/pokemon?limit=100000&offset=0').then(body => body.json());
     var result = response.results.map(e => e.name);
     result = JSON.stringify(result);
@@ -31,3 +35,5 @@ async function getmonlist(req, res){
         res.status(500).send({ error: 'Failed to fetch data from PokeAPI' });
     }
 }
+
+module.exports = {getAllmon, getmonbyName, getmonlist};
