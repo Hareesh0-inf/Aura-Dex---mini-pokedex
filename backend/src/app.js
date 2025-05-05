@@ -1,61 +1,12 @@
 const express = require('express');
 const cors = require('cors')
+const pokeRouter = require('./routes/pokemon.routes')
+
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 
+app.use('/mons',pokeRouter);
 
 module.exports = app
-// const PORT = process.env.PORT || 3000;
-// var pokelist = [];
-// var offset = 0;
-// var limit = 20;
-
-// Middleware
-
-
-// var result;
-
-// // Routes
-
-// app.get('/', async (req, res) => {
-//     try {
-
-//         const response = await fetch(`https://pokeapi.co/api/v2/pokemon?limit=${limit}&offset=${offset}`);
-//         offset+=20;
-//         const body = await response.json();
-//         result = body;
-//         pokelist = pokelist.concat(result.results);
-//         res.send(JSON.stringify(pokelist));
-//     } catch (error) {
-//         res.status(500).send({ error: 'Failed to fetch data from PokeAPI' });
-//     }
-// });
-
-// app.get('/info/:name',async(req,res)=>{
-//     var name = req.params.name;
-//     const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${name}`).then(body => body.json());
-//     var dox = {
-//         abilities: response.abilities,
-//         height: response.height,
-//         name: response.name,
-//         type: response.types,
-//         weight: response.weight,
-//     };
-//     res.send(JSON.stringify(dox));
-// })
-
-// app.get('/allpoki', async(req, res) => {
-//     const response = await fetch('https://pokeapi.co/api/v2/pokemon?limit=100000&offset=0').then(body => body.json());
-//     var result = response.results.map(e => e.name);
-//     result = JSON.stringify(result);
-//     console.log(result)
-//     res.status(200).send(result)
-// })
-
-// // Start the server
-// app.listen(PORT, () => {
-//     console.log(`Server is running on http://localhost:${PORT}`);
-// });
-
